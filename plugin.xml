@@ -1,0 +1,23 @@
+<plugin id="cordova-vonage-plugin-via-js" version="1.0.0">
+    <js-module src="www/opentok.js" name="opentok">
+        <clobbers target="OT" />
+    </js-module>
+    <js-module src="www/VonagePlugin.js" name="VonagePlugin">
+        <clobbers target="VonagePlugin" />
+    </js-module>
+    <platform name="android">
+	<config-file target="AndroidManifest.xml" parent="/manifest">
+		<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+		<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+		<uses-permission android:name="android.permission.CAMERA" />
+		<uses-permission android:name="android.permission.INTERNET" />
+		<uses-permission android:name="android.permission.RECORD_AUDIO" />
+		<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+		<uses-permission android:name="android.permission.BLUETOOTH" />
+		<uses-permission android:name="android.permission.BROADCAST_STICKY" />
+	</config-file>
+    </platform>
+    <platform name="ios">
+        <!-- Add any required iOS configurations -->
+    </platform>
+</plugin>
