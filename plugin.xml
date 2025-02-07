@@ -19,6 +19,11 @@
 	<dependency id="cordova-plugin-android-permissions" version="^1.1.3" />
     </platform>
     <platform name="ios">
-        <!-- Add any required iOS configurations -->
+    	<config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+    		<string>This app requires access to the camera for video calls.</string>
+	</config-file>
+	<config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
+		<string>This app requires access to the microphone for audio during video calls.</string>
+	</config-file>
     </platform>
 </plugin>

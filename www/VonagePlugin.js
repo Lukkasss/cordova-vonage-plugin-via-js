@@ -41,10 +41,10 @@ var VonagePlugin = {
         });
     },
 
-    checkPermissions: function (successCallback, errorCallback) {
+checkPermissions: function (successCallback, errorCallback) {
+    if (cordova.platformId === 'android') {
+        // Android-specific permission handling
         var permissions = cordova.plugins.permissions;
-
-        // List of required permissions
         var requiredPermissions = [
             permissions.CAMERA,
             permissions.RECORD_AUDIO,
@@ -52,10 +52,8 @@ var VonagePlugin = {
             permissions.READ_PHONE_STATE
         ];
 
-        // Check if all required permissions are granted
         permissions.hasPermission(requiredPermissions, function (status) {
             if (!status.hasPermission) {
-                // Request all required permissions
                 permissions.requestPermissions(requiredPermissions, function (requestStatus) {
                     if (requestStatus.hasPermission) {
                         successCallback();
@@ -71,7 +69,21 @@ var VonagePlugin = {
         }, function (error) {
             errorCallback("Error checking permissions: " + error);
         });
-    },
+    } else if (cordova.platformId === 'ios') {
+        // iOS-specific permission handling
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function () {
+                console.log("Camera and microphone permissions granted.");
+                successCallback();
+            })
+            .catch(function (error) {
+                console.error("Error requesting camera/microphone permissions: " + error.message);
+                errorCallback("Camera or microphone permission denied: " + error.message);
+            });
+    } else {
+        errorCallback("Unsupported platform.");
+    }
+},
 
     initWithPermissions: function (apiKey, sessionId, token, elementId, successCallback, errorCallback) {
         // First check and request permissions
