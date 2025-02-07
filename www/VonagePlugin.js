@@ -43,46 +43,38 @@ var VonagePlugin = {
 
     checkPermissions: function (successCallback, errorCallback) {
         if (cordova.platformId === 'android') {
-            // Android-specific permission handling using Diagnostic plugin
-            cordova.plugins.diagnostic.isCameraAuthorized(function (cameraAuthorized) {
-                if (!cameraAuthorized) {
-                    cordova.plugins.diagnostic.requestCameraAuthorization(function (cameraStatus) {
-                        if (cameraStatus === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                            VonagePlugin.checkMicrophonePermission(successCallback, errorCallback);
-                        } else {
-                            errorCallback("Camera permission denied");
-                        }
-                    }, function (error) {
-                        errorCallback("Error requesting camera permission: " + error);
-                    });
-                } else {
-                    VonagePlugin.checkMicrophonePermission(successCallback, errorCallback);
-                }
-            }, function (error) {
-                errorCallback("Error checking camera permission: " + error);
-            });
+            // Android-specific permission handling
+            this.checkCameraPermission(() => {
+                this.checkMicrophonePermission(successCallback, errorCallback);
+            }, errorCallback);
         } else if (cordova.platformId === 'ios') {
-            // iOS-specific permission handling using Diagnostic plugin
-            cordova.plugins.diagnostic.isCameraAuthorized(function (cameraAuthorized) {
-                if (!cameraAuthorized) {
-                    cordova.plugins.diagnostic.requestCameraAuthorization(function (cameraStatus) {
-                        if (cameraStatus === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                            VonagePlugin.checkMicrophonePermission(successCallback, errorCallback);
-                        } else {
-                            errorCallback("Camera permission denied");
-                        }
-                    }, function (error) {
-                        errorCallback("Error requesting camera permission: " + error);
-                    });
-                } else {
-                    VonagePlugin.checkMicrophonePermission(successCallback, errorCallback);
-                }
-            }, function (error) {
-                errorCallback("Error checking camera permission: " + error);
-            });
+            // iOS-specific permission handling
+            this.checkCameraPermission(() => {
+                this.checkMicrophonePermission(successCallback, errorCallback);
+            }, errorCallback);
         } else {
             errorCallback("Unsupported platform");
         }
+    },
+
+    checkCameraPermission: function (successCallback, errorCallback) {
+        cordova.plugins.diagnostic.isCameraAuthorized(function (cameraAuthorized) {
+            if (!cameraAuthorized) {
+                cordova.plugins.diagnostic.requestCameraAuthorization(function (cameraStatus) {
+                    if (cameraStatus === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
+                        successCallback();
+                    } else {
+                        errorCallback("Camera permission denied");
+                    }
+                }, function (error) {
+                    errorCallback("Error requesting camera permission: " + error);
+                });
+            } else {
+                successCallback();
+            }
+        }, function (error) {
+            errorCallback("Error checking camera permission: " + error);
+        });
     },
 
     checkMicrophonePermission: function (successCallback, errorCallback) {
@@ -90,7 +82,7 @@ var VonagePlugin = {
             if (!microphoneAuthorized) {
                 cordova.plugins.diagnostic.requestMicrophoneAuthorization(function (microphoneStatus) {
                     if (microphoneStatus === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                        successCallback("Permissions granted");
+                        successCallback();
                     } else {
                         errorCallback("Microphone permission denied");
                     }
@@ -98,7 +90,7 @@ var VonagePlugin = {
                     errorCallback("Error requesting microphone permission: " + error);
                 });
             } else {
-                successCallback("Permissions granted");
+                successCallback();
             }
         }, function (error) {
             errorCallback("Error checking microphone permission: " + error);
