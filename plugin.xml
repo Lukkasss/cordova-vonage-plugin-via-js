@@ -16,6 +16,7 @@
 		<uses-permission android:name="android.permission.BLUETOOTH" />
 		<uses-permission android:name="android.permission.BROADCAST_STICKY" />
 	</config-file>
+	<dependency id="cordova.plugins.diagnostic" version="^7.1.2" />
     </platform>
     <platform name="ios">
         <!-- Add any required iOS configurations -->
