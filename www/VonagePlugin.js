@@ -42,50 +42,53 @@ var VonagePlugin = {
     },
 
     checkPermissions: function (successCallback, errorCallback) {
-        // Check Camera Authorization
-        cordova.plugins.diagnostic.isCameraAuthorized(function (cameraAuthorized) {
-            if (!cameraAuthorized) {
-                // Request Camera Authorization
-                cordova.plugins.diagnostic.requestCameraAuthorization(function (cameraStatus) {
-                    if (cameraStatus === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                        console.log("Camera permission granted");
-                        // Check Microphone Authorization
-                        VonagePlugin.checkMicrophonePermission(successCallback, errorCallback);
-                    } else {
-                        errorCallback("Camera permission denied");
-                    }
-                }, function (error) {
-                    errorCallback("Error requesting camera permission: " + error);
-                });
-            } else {
-                // Check Microphone Authorization
-                VonagePlugin.checkMicrophonePermission(successCallback, errorCallback);
-            }
-        }, function (error) {
-            errorCallback("Error checking camera permission: " + error);
-        });
-    },
+        var permissions = cordova.plugins.permissions;
 
-    checkMicrophonePermission: function (successCallback, errorCallback) {
-        cordova.plugins.diagnostic.isMicrophoneAuthorized(function (microphoneAuthorized) {
-            if (!microphoneAuthorized) {
-                // Request Microphone Authorization
-                cordova.plugins.diagnostic.requestMicrophoneAuthorization(function (microphoneStatus) {
-                    if (microphoneStatus === cordova.plugins.diagnostic.permissionStatus.GRANTED) {
-                        console.log("Microphone permission granted");
+        // List of required permissions
+        var requiredPermissions = [
+            permissions.CAMERA,
+            permissions.RECORD_AUDIO,
+            permissions.BLUETOOTH_CONNECT,
+            permissions.READ_PHONE_STATE
+        ];
+
+        // Check if all required permissions are granted
+        permissions.hasPermission(requiredPermissions, function (status) {
+            if (!status.hasPermission) {
+                // Request all required permissions
+                permissions.requestPermissions(requiredPermissions, function (requestStatus) {
+                    if (requestStatus.hasPermission) {
                         successCallback();
                     } else {
-                        errorCallback("Microphone permission denied");
+                        errorCallback("Required permissions denied");
                     }
                 }, function (error) {
-                    errorCallback("Error requesting microphone permission: " + error);
+                    errorCallback("Error requesting permissions: " + error);
                 });
             } else {
                 successCallback();
             }
         }, function (error) {
-            errorCallback("Error checking microphone permission: " + error);
+            errorCallback("Error checking permissions: " + error);
         });
+    },
+
+    initWithPermissions: function (apiKey, sessionId, token, elementId, successCallback, errorCallback) {
+        // First check and request permissions
+        this.checkPermissions(
+            () => {
+                console.log("All required permissions granted.");
+                // Proceed with initialization and publishing
+                this.init(apiKey, sessionId, token,
+                    () => this.startPublishing(elementId, successCallback, errorCallback),
+                    errorCallback
+                );
+            },
+            (error) => {
+                console.error("Permission check failed: " + error);
+                errorCallback(error);
+            }
+        );
     }
 };
 
